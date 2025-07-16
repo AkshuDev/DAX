@@ -1,0 +1,17 @@
+%define GENERIC_READ 0x80000000
+%define GENERIC_WRITE 0x40000000
+
+%define FILE_SHARE_READ 1
+
+%define OPEN_EXISTING 3
+%define CREATE_ALWAYS 2
+
+%define STD_OUTPUT_HANDLE -11
+
+%define ENDL 10
+%define NULL_T 0
+%define NULL 0
+
+%define INVALID_HANDLE_VALUE -1
+
+%define INVALID_USAGE 1
