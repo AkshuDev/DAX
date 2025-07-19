@@ -76,14 +76,13 @@ _start:
 
 	add sp, sp, #16 // Clean up
 
-	sub sp, sp, #8
-	str x0, [sp, #-8]!
+	stp x0, x0, [sp, #-16]!
 	
 	b exit
 
 exit: // 8 byte value
 	ldr x0, [sp]
-	add sp, sp, #8
+	add sp, sp, #16
 	mov x8, #93
 	svc #0
 
@@ -96,7 +95,7 @@ dax_usage_error:
 	
 	add sp, sp, #16
 
-	// Exit code is on stack given by dax_printf
+	stp x0, x0, [sp, #-16]!
 	b exit
 
 clean:

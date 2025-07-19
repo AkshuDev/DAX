@@ -22,7 +22,7 @@ dax_print:
 	// Return
 	mov x0, #0
 
-	ldp x30, x29, [sp], #16
+	ldp x29, x30, [sp], #16
 
 	ret
 
@@ -32,16 +32,14 @@ dax_strlen:
 	mov x29, sp
 
 	ldr x10, [sp, #16]
-	mov x11, #0
+	mov x0, #0
 .loop:
-	ldrb w2, [x10, x11]
+	ldrb w2, [x10, x0]
 	cbz w2, .done
-	add x11, x11, #1
+	add x0, x0, #1
 	b .loop
 .done:
-	mov x0, #0
-
-	ldp x30, x29, [sp], #16
+	ldp x29, x30, [sp], #16
 	ret
 
 dax_printf:
@@ -66,6 +64,12 @@ dax_printf:
 	bl dax_print
 
 	add sp, sp, #32
+
+	mov x0, #1 // stdout
+	mov x1, #10 // \n
+	mov x2, #1 // Size
+	mov x8, #64 // Write
+	svc #0 // syscall
 
 	ldp x29, x30, [sp]
 	ret
