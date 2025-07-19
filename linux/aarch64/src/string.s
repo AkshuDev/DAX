@@ -3,6 +3,8 @@
 .global dax_strlen
 .global dax_printf
 
+// 16 byte params only
+
 dax_print:
 	// char*, int (ptr, size)
 	stp x29, x30, [sp, #-16]! // Save the frame and ret addr
@@ -10,7 +12,7 @@ dax_print:
 
 	// Load params
 	ldr x1, [sp, #16]
-	ldr x2, [sp, #24]
+	ldr x2, [sp, #32]
 
 	// Print
 	mov x0, #1 // stdout
@@ -18,14 +20,14 @@ dax_print:
 	svc #0
 
 	// Return
-	sub sp, sp, #8
-	str x0, [sp]
+	mov x0, #0
 
 	ldp x30, x29, [sp], #16
 
 	ret
 
 dax_strlen:
+	// char* (ptr)
 	stp x29, x30, [sp, #-16]!
 	mov x29, sp
 
@@ -37,8 +39,7 @@ dax_strlen:
 	add x11, x11, #1
 	b .loop
 .done:
-	sub sp, sp, #8
-	str x11, [sp]
+	mov x0, #0
 
 	ldp x30, x29, [sp], #16
 	ret
@@ -48,21 +49,23 @@ dax_printf:
 	mov x29, sp
 
 	ldr x10, [sp, #16]
-	str x10, [sp, #-8]!
+	str x10, [sp, #-16]!
 
 	bl dax_strlen
 
-	ldr x11, [sp]
-	add sp, sp, #8
+	mov x11, x0
+	mov x0, #0
+
+	add sp, sp, #16
 
 	ldr x10, [sp, #16]
 	
-	str x11, [sp, #-8]!
-	str x10, [sp, #-8]!
+	str x11, [sp, #-16]!
+	str x10, [sp, #-16]!
 
 	bl dax_print
 
-	add sp, sp, #16
+	add sp, sp, #32
 
 	ldp x29, x30, [sp]
 	ret
