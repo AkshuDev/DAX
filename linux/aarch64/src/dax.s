@@ -2,6 +2,10 @@
 
 .section .rodata
 usage: .asciz "Usage: dax <input> <output> <-[OPTIONS]>\n"
+starting_dax: .asciz "Starting dax...\n"
+daxing_file: .asciz "DAXing file - "
+daxing_to_file: .asciz " to "
+nline: .asciz "\n"
 
 .section .data
 buffer: .skip MAX_FILE_BUF
@@ -45,39 +49,53 @@ _start:
 	cbz w6, .done_fd_out
 	b .loop_fd_out
 .done_fd_out:
-	mov x5, #0
-	mov x0, #0
-	mov x11, #0
-	mov x12, #0
-	mov x13, #0
-	mov x14, #0
+	ldr x10, =starting_dax
+	str x10, [sp, #-16]!
+	bl dax_printf
+	add sp, sp, #16
+
+	bl clean
 
 	// Reg Cleaned for further usage!
 	
 	// Print parsed args
-	adrp x10, fdIn
-	add x10, x10, :lo12:fdIn
+	adrp x12, fdIn
+	add x12, x12, :lo12:fdIn
 	adrp x13, fdOut
 	add x13, x13, :lo12:fdOut
 
 	mov x0, #0
 
-	str x10, [sp, #-16]! // stack is aligned right now
+	ldr x14, =daxing_file
+	str x14, [sp, #-16]!
+	bl dax_printf
+	add sp, sp, #16
+
+	str x12, [sp, #-16]! // stack is aligned right now
 	
 	bl dax_printf
-
 	add sp, sp, #16 // Clean
+	
+	ldr x14, =daxing_to_file
+	str x14, [sp, #-16]!
+	bl dax_printf
+	add sp, sp, #16
 
 	str x13, [sp, #-16]!
 
 	bl dax_printf
+	add sp, sp, #16
+
+	ldr x14, =nline
+	str x14, [sp, #-16]!
+	
+	bl dax_printf
+	add sp, sp, #16
 
 	bl clean
 
-	add sp, sp, #16 // Clean up
-
 	stp x0, x0, [sp, #-16]!
-	
+
 	b exit
 
 exit: // 8 byte value

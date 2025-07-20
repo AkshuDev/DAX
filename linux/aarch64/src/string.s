@@ -65,11 +65,5 @@ dax_printf:
 
 	add sp, sp, #32
 
-	mov x0, #1 // stdout
-	mov x1, #10 // \n
-	mov x2, #1 // Size
-	mov x8, #64 // Write
-	svc #0 // syscall
-
 	ldp x29, x30, [sp]
 	ret
