@@ -2,8 +2,18 @@ BITS 64
 
 %include "inc/dax.inc"
 
+; string.asm
+extern dax_printf
+extern dax_print
+extern dax_sizeof
+extern dax_strcpy
+
 section .data
 usage_error db "Usage: dax <input> <output> <-[OPTIONS]>", ENDL, NULL_T
+starting_dax db "Starting dax...", ENDL, NULL_T
+DaXing_file db "daXing file "
+DaXing_to db " to "
+endline db "", ENDL, NULL_T
 
 section .bss
 fdIn resb MAX_FILE_BUF
@@ -21,21 +31,46 @@ _start: ; rbx, r12, r13, r14, r15 (calle saved)
     cmp rbx, 3
     jl dax_usage_error
 
-    pop r12
-    pop r13
+    pop rsi
+    pop rsi ; src
+    lea rdi, [rel fdIn] ; dest
+    call dax_strcpy
 
-dax_usage_error:
-    lea rbx, [rel usage_error]
-    push rbx
+    pop rsi ; src
+    lea rdi, [rel fdOut] ; dest
+    call dax_strcpy
+
+    lea rdi, [rel starting_dax]
     call dax_printf
 
-    mov rbx, USAGE_ERROR
-    push rbx
+    ; print -> daXing file [fdIn] to [fdOut]\n\0
+    lea rdi, [rel DaXing_file]
+    call dax_printf
+
+    lea rdi, [rel fdIn]
+    call dax_printf
+
+    lea rdi, [rel DaXing_to]
+    call dax_printf
+
+    lea rdi, [rel fdOut]
+    call dax_printf
+
+    lea rdi, [rel endline]
+    call dax_printf
+
+    mov rdi, 0
+    jmp exit
+
+dax_usage_error:
+    lea rdi, [rel usage_error]
+    call dax_printf
+
+    mov rax, USAGE_ERROR
 
     jmp exit
 
 exit:
-    pop rdi
     mov rax, 60
 
     syscall
