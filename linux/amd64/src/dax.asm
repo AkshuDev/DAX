@@ -19,6 +19,10 @@ read_error db "ERROR: Unable to read <input> file!", ENDL, NULL_T
 
 endline db "", ENDL, NULL_T
 
+daX_hdr:
+    db "DAX" ; char Magic [3]
+    db 
+
 section .bss
 fnIn resb MAX_FILE_BUF
 fnOut resb MAX_FILE_BUF
@@ -33,19 +37,7 @@ global _start
 
 _start: ; rbx, r12, r13, r14, r15 (calle saved)
     ; Parse Args (do not pop off the stack to disturb the alignment)
-    mov rsi, [rsp] ; argc
-
-    cmp rsi, 3
-    jl dax_usage_error
-
-    mov rsi, [rsp + 8] ; useless tho (argv[0])
-    mov rsi, [rsp + 16] ; src (argv[1], file input)
-    lea rdi, [rel fnIn] ; dest
-    call dax_strcpy
-
-    mov rsi, [rsp + 24] ; src (argv[2], file output)
-    lea rdi, [rel fnOut] ; dest
-    call dax_strcpy
+    call dax_parse_args
 
     lea rdi, [rel starting_dax]
     call dax_printf
@@ -90,10 +82,28 @@ _start: ; rbx, r12, r13, r14, r15 (calle saved)
     mov rdi, [rel fdIn]
     syscall
 
-    ; Now we hand over to 
-    ; Just in case the jmp fails
+    
+
+    ; Exit
     mov rdi, 0
     jmp exit
+
+dax_parse_args:
+    mov rsi, [rsp] ; argc
+
+    cmp rsi, 3
+    jl dax_usage_error
+
+    mov rsi, [rsp + 8] ; useless tho (argv[0])
+    mov rsi, [rsp + 16] ; src (argv[1], file input)
+    lea rdi, [rel fnIn] ; dest
+    call dax_strcpy
+
+    mov rsi, [rsp + 24] ; src (argv[2], file output)
+    lea rdi, [rel fnOut] ; dest
+    call dax_strcpy
+
+    ret
 
 dax_read_error:
     ; Close the file first
