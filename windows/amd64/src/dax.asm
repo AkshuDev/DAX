@@ -52,7 +52,7 @@ global main
 ; CODE SECTION
 main:
     ; Shadow space
-    sub rsp, 28h
+    sub rsp, 20h
 
     ; GetCommandLineA to get and parse args
     call GetCommandLineA
@@ -60,36 +60,54 @@ main:
 
 skip_exe:
     cmp byte [rsi], ' '
-    je found_space
+    je skip_spaces_input
     cmp byte [rsi], 0
     je show_usage
     inc rsi
     jmp skip_exe
 
-found_space:
-    ; skip spaces
+skip_spaces_input:
+    ; Skip any additional spaces
     inc rsi
     cmp byte [rsi], ' '
-    je found_space
+    je skip_spaces_input
+    cmp byte [rsi], 0
+    je show_usage
 
-    mov rdi, rsi ; input file
+    ; rsi now at input filename
+    mov rdi, rsi ; input filename
 
-find_output:
+find_end_input:
     cmp byte [rsi], ' '
-    je end_input
+    je null_terminate_input
     cmp byte [rsi], 0
     je show_usage
     inc rsi
-    jmp find_output
+    jmp find_end_input
 
-end_input:
+null_terminate_input:
     mov byte [rsi], 0
     inc rsi
+
+skip_spaces_output:
+    cmp byte [rsi], ' '
+    je skip_spaces_output
     cmp byte [rsi], 0
     je show_usage
 
-    ; rdi = input filename, rsi = output filename
+    ; rsi now points to output filename
 
+find_end_output:
+    cmp byte [rsi], ' '
+    je null_terminate_output
+    cmp byte [rsi], 0
+    jmp start ; finished parsing both input and output
+    inc rsi
+    jmp find_end_output
+
+null_terminate_output:
+    mov byte [rsi], 0
+    inc rsi
     jmp start
 
 exit:
