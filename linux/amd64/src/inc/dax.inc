@@ -6,10 +6,12 @@
 ; Buffers
 %define MAX_FILE_BUF 256
 %define MAX_FILE_CONTENTS_BUF 65536
+%define HEADER_SIZE 12
 
 ; Errors
 %define USAGE_ERROR 1
 %define UNABLE_TO_READ_FILE_ERROR 2
+%define UNABLE_TO_WRITE_FILE_ERROR 3
 
 ; Open FLAGS
 %define O_RDONLY        0x0000

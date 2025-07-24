@@ -16,12 +16,15 @@ DaXing_file db "daXing file ", NULL_T
 DaXing_to db " to ", NULL_T
 
 read_error db "ERROR: Unable to read <input> file!", ENDL, NULL_T
+write_error db "ERROR: Unable to write to <output> file!", ENDL, NULL_T
 
 endline db "", ENDL, NULL_T
 
 daX_hdr:
     db "DAX" ; char Magic [3]
-    db 
+    db 1 ; uint8_t Version
+    dd 0 ; uint32_t EntryPoint
+    dd 0 ; uint32_t CodeSize
 
 section .bss
 fnIn resb MAX_FILE_BUF
@@ -82,24 +85,53 @@ _start: ; rbx, r12, r13, r14, r15 (calle saved)
     mov rdi, [rel fdIn]
     syscall
 
-    
+    call dax_phase2
 
     ; Exit
     mov rdi, 0
     jmp exit
 
+dax_phase2:
+    ; This is were the main buffer altering takes place.
+    ; First we create the header
+    ; Open out file
+    mov rax, 2 ; open
+    lea rdi, [rel fnOut]
+    mov rsi, O_WRONLY | O_CREAT | O_TRUNC
+    mov rdx, MODE_644
+    syscall
+
+    mov [rel fdOut], rax
+
+    ; Now we get the alter the buffer and write. For now we just write, altering later.
+    mov rax, 1
+    mov rdi, [rel fdOut]
+    lea rsi, [rel daX_hdr]
+    mov rdx, HEADER_SIZE
+    syscall
+
+    cmp rax, HEADER_SIZE
+    jl dax_write_error
+
+    ; Now we parse so till then close the file to prevent any errors
+    mov rax, 3 ; close
+    mov rdi, [rel fdOut]
+    syscall
+
+    ; Now time for code parsing
+    ret ; TODO: Finish
+
 dax_parse_args:
-    mov rsi, [rsp] ; argc
+    mov rsi, [rsp + 8] ; argc
 
     cmp rsi, 3
     jl dax_usage_error
 
-    mov rsi, [rsp + 8] ; useless tho (argv[0])
     mov rsi, [rsp + 16] ; src (argv[1], file input)
     lea rdi, [rel fnIn] ; dest
     call dax_strcpy
 
-    mov rsi, [rsp + 24] ; src (argv[2], file output)
+    mov rsi, [rsp + 32]; src (argv[2], file output)
     lea rdi, [rel fnOut] ; dest
     call dax_strcpy
 
@@ -115,6 +147,18 @@ dax_read_error:
     call dax_printf ; Print Error
 
     mov rdi, UNABLE_TO_READ_FILE_ERROR
+    jmp exit
+
+dax_write_error:
+    ; Close the file first
+    mov rax, 3
+    mov rdi, [rel fdOut]
+    syscall ; Close
+
+    lea rdi, [rel write_error]
+    call dax_printf ; Print Error
+
+    mov rdi, UNABLE_TO_WRITE_FILE_ERROR
     jmp exit
 
 dax_usage_error:

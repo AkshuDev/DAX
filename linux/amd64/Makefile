@@ -41,4 +41,4 @@ clean:
 	rm -f $(OBJS) $(TARGET)
 
 # === Phony Targets ===
-.PHONY: all clean
+.PHONY: all clean 
