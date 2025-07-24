@@ -12,11 +12,17 @@ typedef struct {
 } DAX_PAD_hdr;
 
 // Error codes
-
+#define USAGE_ERROR 1
 
 int main(int argc, char** argv) {
     if (argc < 3) {
         printf("Usage: dax-asm <input> <output> <-[OPTIONS]>\n");
-        return 
+        return USAGE_ERROR;
     }
+
+    for (int i = 1;i < argc; i++){
+	
+    }
+
+    return 0;
 }
